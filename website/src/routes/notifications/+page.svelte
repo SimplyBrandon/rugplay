@@ -1,11 +1,11 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
-	import { Button } from '$lib/components/ui/button';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import SEO from '$lib/components/self/SEO.svelte';
 	import NotificationsSkeleton from '$lib/components/self/skeletons/NotificationsSkeleton.svelte';
+	import NotificationItem from './NotificationItem.svelte';
 	import { Bell, Target, Settings, TrendingUp, AlertTriangle } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import {
@@ -17,6 +17,31 @@
 	import { formatTimeAgo, formatValue } from '$lib/utils';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
+
+	function getNotificationIcon(type: string) {
+		switch (type) {
+			case 'HOPIUM':
+				return Target;
+			case 'TRANSFER':
+				return TrendingUp;
+			case 'RUG_PULL':
+				return AlertTriangle;
+			case 'SYSTEM':
+				return Settings;
+			default:
+				return Bell;
+		}
+	}
+
+	function getNotificationIconColorClasses(type: string) {
+		const colors = {
+			HOPIUM: 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400',
+			TRANSFER: 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400',
+			RUG_PULL: 'bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400',
+			SYSTEM: 'bg-purple-100 text-purple-600 dark:bg-purple-900/50 dark:text-purple-400'
+		};
+		return colors[type as keyof typeof colors] || 'bg-muted text-muted-foreground';
+	}
 
 	let loading = $state(true);
 	let newNotificationIds = $state<number[]>([]);
@@ -42,52 +67,6 @@
 			loading = false;
 		}
 	});
-
-	function getNotificationIcon(type: string) {
-		switch (type) {
-			case 'HOPIUM':
-				return Target;
-			case 'TRANSFER':
-				return TrendingUp;
-			case 'RUG_PULL':
-				return AlertTriangle;
-			case 'SYSTEM':
-				return Settings;
-			default:
-				return Bell;
-		}
-	}
-
-	function getNotificationColorClasses(type: string, isNew: boolean, isRead: boolean) {
-		const base =
-			'hover:bg-muted/50 flex w-full items-start gap-4 rounded-md p-3 text-left transition-all duration-200';
-
-		if (isNew) {
-			return `${base} bg-primary/10`;
-		}
-
-		if (!isRead) {
-			const colors = {
-				HOPIUM: 'bg-blue-50/50 dark:bg-blue-950/10',
-				TRANSFER: 'bg-green-50/50 dark:bg-green-950/10',
-				RUG_PULL: 'bg-red-50/50 dark:bg-red-950/10',
-				SYSTEM: 'bg-purple-50/50 dark:bg-purple-950/10'
-			};
-			return `${base} ${colors[type as keyof typeof colors] || 'bg-muted/20'}`;
-		}
-
-		return base;
-	}
-
-	function getNotificationIconColorClasses(type: string) {
-		const colors = {
-			HOPIUM: 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400',
-			TRANSFER: 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400',
-			RUG_PULL: 'bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400',
-			SYSTEM: 'bg-purple-100 text-purple-600 dark:bg-purple-900/50 dark:text-purple-400'
-		};
-		return colors[type as keyof typeof colors] || 'bg-muted text-muted-foreground';
-	}
 </script>
 
 <SEO
@@ -132,15 +111,9 @@
 					<div class="space-y-1">
 						{#each $NOTIFICATIONS as notification, index (notification.id)}
 							{@const IconComponent = getNotificationIcon(notification.type)}
-							{@const isNewNotification = newNotificationIds.includes(notification.id)}
-							<a
-								href="{notification.link}"
-								class="{getNotificationColorClasses(
-									notification.type,
-									isNewNotification,
-									notification.isRead
-								)}"
-							>
+							{@const isNew = newNotificationIds.includes(notification.id)}
+							
+							<NotificationItem {notification}>
 								<div
 									class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full {getNotificationIconColorClasses(
 										notification.type
@@ -152,10 +125,10 @@
 								<div class="min-w-0 flex-1">
 									<div class="mb-1 flex items-center gap-2">
 										<h3 class="truncate text-sm font-medium">{notification.title}</h3>
-										{#if !notification.isRead && !isNewNotification}
+										{#if !notification.isRead && !isNew}
 											<div class="bg-primary h-2 w-2 flex-shrink-0 rounded-full"></div>
 										{/if}
-										{#if isNewNotification}
+										{#if isNew}
 											<Badge variant="default" class="px-1.5 py-0.5 text-xs">New</Badge>
 										{/if}
 									</div>
@@ -190,7 +163,7 @@
 										{formatTimeAgo(notification.createdAt)}
 									</p>
 								</div>
-							</a>
+							</NotificationItem>
 
 							{#if index < $NOTIFICATIONS.length - 1}
 								<Separator />
