@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
+	import { Button } from '$lib/components/ui/button';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import SEO from '$lib/components/self/SEO.svelte';
@@ -132,12 +133,13 @@
 						{#each $NOTIFICATIONS as notification, index (notification.id)}
 							{@const IconComponent = getNotificationIcon(notification.type)}
 							{@const isNewNotification = newNotificationIds.includes(notification.id)}
-							<button
-								class={getNotificationColorClasses(
+							<a
+								href="{notification.link}"
+								class="{getNotificationColorClasses(
 									notification.type,
 									isNewNotification,
 									notification.isRead
-								)}
+								)}"
 							>
 								<div
 									class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full {getNotificationIconColorClasses(
@@ -188,11 +190,7 @@
 										{formatTimeAgo(notification.createdAt)}
 									</p>
 								</div>
-							</button>
-
-							{#if index < $NOTIFICATIONS.length - 1}
-								<Separator />
-							{/if}
+							</a>
 						{/each}
 					</div>
 				</ScrollArea>

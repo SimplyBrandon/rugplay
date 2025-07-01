@@ -25,6 +25,7 @@ export const GET: RequestHandler = async ({ url, request }) => {
             type: notifications.type,
             title: notifications.title,
             message: notifications.message,
+            link: notifications.link,
             isRead: notifications.isRead,
             createdAt: notifications.createdAt,
         })
@@ -44,8 +45,8 @@ export const GET: RequestHandler = async ({ url, request }) => {
             unreadCount
         });
     } catch (e) {
-        console.error('Failed to fetch notificationss:', e);
-        throw error(500, 'Failed to fetch notificationss');
+        console.error('Failed to fetch notifications:', e);
+        throw error(500, 'Failed to fetch notifications');
     }
 };
 
