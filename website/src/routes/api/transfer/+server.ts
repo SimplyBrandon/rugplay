@@ -131,7 +131,7 @@ export const POST: RequestHandler = async ({ request }) => {
                         'TRANSFER',
                         'Money received!',
                         `You received ${formatValue(amount)} from @${senderData.username}`,
-                        `/user/${senderData.username}`
+                        `/user/${senderData.id}`
                     );
                 })();
 

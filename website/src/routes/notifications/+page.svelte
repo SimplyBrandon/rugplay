@@ -191,6 +191,10 @@
 									</p>
 								</div>
 							</a>
+
+							{#if index < $NOTIFICATIONS.length - 1}
+								<Separator />
+							{/if}
 						{/each}
 					</div>
 				</ScrollArea>
